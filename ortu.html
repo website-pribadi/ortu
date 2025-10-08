@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat Publik</title>
+  <link rel="icon" href="ikon2.png" type="image/png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     * { box-sizing: border-box; }
@@ -70,9 +71,9 @@
       color:#00796b; cursor:pointer;
     }
 
-    /* 🔹 Preview file di atas input box (FIX) */
+    /* 🔹 Preview file di atas input box */
     #filePreview {
-      display: none; /* awalnya tersembunyi */
+      display: none;
       background: #e0f7fa;
       border-top: 1px solid #ccc;
       border-bottom: 1px solid #ccc;
@@ -147,16 +148,17 @@
   </div>
 
  <script>
+    // 🔒 Cek apakah user sudah pilih peran
+    let senderName = sessionStorage.getItem("chat_name");
+    if (!senderName) {
+      alert("Silakan pilih peran terlebih dahulu.");
+      window.location.href = "index.html";
+    }
+
     const supabase = window.supabase.createClient(
       "https://zawtfjszvkuudawrilqg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8"
     );
-
-    let senderName = localStorage.getItem("chat_name");
-    if (!senderName) {
-      senderName = prompt("Masukkan nama Anda:") || "Anonim";
-      localStorage.setItem("chat_name", senderName);
-    }
 
     const messagesDiv = document.getElementById("messages");
     const input = document.getElementById("messageInput");
@@ -170,7 +172,6 @@
     let selectedMessageText = null;
     let selectedFile = null;
 
-    // 🔍 Tentukan ikon berdasarkan tipe file
     function getFileIcon(filename, type) {
       const lower = (filename || "").toLowerCase();
       if (type.startsWith("image/")) return "📷";
@@ -183,14 +184,13 @@
       return "📎";
     }
 
-    // 🔄 Preview file di atas input
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
       if (file) {
         selectedFile = file;
         const icon = getFileIcon(file.name, file.type);
         filePreviewText.textContent = `${icon} ${file.name}`;
-        filePreview.style.display = "flex"; // baru muncul setelah user pilih file
+        filePreview.style.display = "flex";
       }
     });
 

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pilih Peran</title>
+  <link rel="icon" href="ikon2.png" type="image/png">
   <style>
     body {
       margin: 0; padding: 0;
@@ -35,12 +36,12 @@
 </head>
 <body>
   <h1>Pilih Peran Anda</h1>
-  <button class="role-btn" onclick="chooseRole('Anak')">👶 Anak</button>
-  <button class="role-btn" onclick="chooseRole('Ortu')">👨‍👩‍👧 Ortu</button>
+  <button class="role-btn" onclick="chooseRole('Khalid')">👶 Khalid</button>
+  <button class="role-btn" onclick="chooseRole('Orang Tua')">👨‍👩‍👧 Orang Tua</button>
 
   <script>
     function chooseRole(role) {
-      localStorage.setItem("chat_name", role);
+      sessionStorage.setItem("chat_name", role);
       window.location.href = "ortu.html";
     }
   </script>
