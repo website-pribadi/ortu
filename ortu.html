@@ -3,134 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Publik</title>
+  <title>Chat Private</title>
   <link rel="icon" href="ikon2.png" type="image/png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <style>
-    * { box-sizing: border-box; }
+<style>
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #d2dbdc;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .chat-box {
+    width: 100vw; height: 100vh;
+    background: #f8f9fa;
+    display: flex; flex-direction: column;
+  }
+  .header {
+    background: #075e54; color: white;
+    padding: 14px; font-size: 18px; font-weight: bold; text-align: center;
+    position: relative;
+  }
+  #profilePic {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid white;
+  }
+  .messages {
+    flex: 1; padding: 20px; overflow-y: auto; background: #efeae2;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .message {
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 70%;
+    position: relative;
+  }
+  .me { align-self: flex-end; background: #dcf8c6; }
+  .friend { align-self: flex-start; background: #ffffff; }
+  .message small { display: block; margin-top: 6px; font-size: 12px; color: #666; text-align: left; }
+  .me small { text-align: right; }
+  .selected { transform: translateX(-40px); box-shadow: 0 0 6px rgba(0,0,0,0.2); }
+  .input-box { display: flex; align-items: center; padding: 10px; background: #f0f0f0; border-top: 1px solid #ccc; }
+  .input-box input[type="text"] { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; }
+  .input-box button { margin-left: 10px; padding: 10px 20px; border: none; border-radius: 20px; background: #075e54; color: white; cursor: pointer; }
+  .input-box label { margin-left: 10px; font-size: 20px; cursor: pointer; }
+  #replyBox { display:none; padding:10px; background:#e0f7fa; border-left:4px solid #00796b; font-size: 13px; }
+  #replyBox button { float:right; background:none; border:none; color:#00796b; cursor:pointer; }
+  .context-menu {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1000;
+  }
+  .context-menu button {
+    width: 42px; height: 42px; font-size: 18px; background: white; border: 1px solid #ccc;
+    cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: background 0.2s; padding: 0;
+  }
+  .context-menu button:hover { background: #f0f0f0; }
+
+  /* 💠 Gaya untuk link file */
+  .file-link {
+    display: inline-block;
+    background: #e9f5f0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-top: 6px;
+    color: #075e54;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .file-link:hover { background: #d8eee6; }
+
+  /* 🌐 Perbaikan tampilan untuk HP (lebar layar ≤ 768px) */
+  @media (max-width: 768px) {
     body, html {
-      margin: 0; padding: 0; height: 100%;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: block; /* hilangkan center di HP */
       background: #d2dbdc;
-      display: flex; justify-content: center; align-items: center;
     }
-    .chat-box { width: 100vw; height: 100vh; background: #f8f9fa; display: flex; flex-direction: column; }
-    .header {
-      background: #075e54; color: white;
-      padding: 14px; font-size: 18px; font-weight: bold; text-align: center;
+
+    .chat-box {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0; left: 0;
+      max-width: 100%;
+      background: #f8f9fa;
+      border-radius: 0;
     }
+
     .messages {
-      flex: 1; padding: 20px; overflow-y: auto; background: #efeae2;
-      display: flex; flex-direction: column;
-      position: relative;
+      padding: 10px;
+      flex: 1;
+      overflow-y: auto;
+      background: #efeae2;
     }
-    .message {
-      background: #fff;
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin: 6px 0;
-      display: inline-block;
-      font-size: 14px;
-      line-height: 1.4;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      max-width: 70%;
-      position: relative;
-    }
-    .me { align-self: flex-end; background: #dcf8c6; }
-    .friend { align-self: flex-start; background: #ffffff; }
-    .message small { display: block; margin-top: 6px; font-size: 12px; color: #666; text-align: left; }
-    .me small { text-align: right; }
-    .selected { transform: translateX(-40px); box-shadow: 0 0 6px rgba(0,0,0,0.2); }
 
     .input-box {
-      display: flex; align-items: center;
-      padding: 10px; background: #f0f0f0;
-      border-top: 1px solid #ccc; flex-wrap: wrap;
-    }
-    .input-box input[type="text"] {
-      flex: 1; padding: 12px;
-      border-radius: 20px; border: none; outline: none;
-    }
-    .input-box button {
-      margin-left: 10px; padding: 10px 20px;
-      border: none; border-radius: 20px;
-      background: #075e54; color: white;
-      cursor: pointer;
-    }
-    .input-box label { margin-left: 10px; font-size: 20px; cursor: pointer; }
-
-    #replyBox {
-      display:none; padding:10px;
-      background:#e0f7fa; border-left:4px solid #00796b;
-      font-size: 13px;
-    }
-    #replyBox button {
-      float:right; background:none; border:none;
-      color:#00796b; cursor:pointer;
-    }
-
-    /* 🔹 Preview file di atas input box */
-    #filePreview {
-      display: none;
-      background: #e0f7fa;
+      padding: 8px;
       border-top: 1px solid #ccc;
-      border-bottom: 1px solid #ccc;
-      padding: 10px 14px;
-      font-size: 14px;
-      color: #075e54;
-      align-items: center;
-      justify-content: space-between;
+      background: #f0f0f0;
     }
-    #filePreview span {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    #filePreview button {
-      background: none;
-      border: none;
-      color: #075e54;
-      font-size: 18px;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-
-    .context-menu {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 1000;
-    }
-    .context-menu button {
-      width: 42px; height: 42px;
-      font-size: 18px; background: white;
-      border: 1px solid #ccc;
-      cursor: pointer; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-      transition: background 0.2s; padding: 0;
-    }
-    .context-menu button:hover { background: #f0f0f0; }
-  </style>
+  }
+</style>
 </head>
 <body>
   <div class="chat-box">
-    <div class="header">Chat Publik</div>
+    <div class="header">
+      Chat Private
+    </div>
 
     <div id="messages" class="messages"></div>
 
     <div id="replyBox">Membalas: <span id="replyText"></span>
       <button onclick="cancelReply()">✕</button>
-    </div>
-
-    <!-- 🔹 Preview file di atas input -->
-    <div id="filePreview">
-      <span id="filePreviewText"></span>
-      <button onclick="clearFile()">✕</button>
     </div>
 
     <div class="input-box">
@@ -146,7 +154,6 @@
     <button title="Edit" onclick="handleEdit()">✎</button>
     <button title="Hapus" onclick="handleDelete()">⌦</button>
   </div>
-
  <script>
     // 🔒 Cek apakah user sudah pilih peran
     let senderName = sessionStorage.getItem("chat_name");
