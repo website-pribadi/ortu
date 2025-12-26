@@ -8,7 +8,7 @@
 <style>
 /* RESET */
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;font-family:Arial;background:#ece5dd}
+html,body{height:100%;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;background:#ece5dd}
 #app{display:flex;flex-direction:column;height:100vh}
 
 /* HEADER */
@@ -79,14 +79,25 @@ html,body{height:100%;font-family:Arial;background:#ece5dd}
   max-width:70%;
   padding:3px 12px;
   margin:6px 0;
-  border-radius:8px;
+  border-radius:7.5px;
   font-size:14px;
-  line-height:1.4;
+  line-height:15px;
   clear:both;
   word-wrap:break-word;
+  box-shadow:0 1px 0.5px rgba(0,0,0,.13);
 }
-.saya{background:#dcf8c6;float:right;border-top-right-radius:0}
-.lawan{background:#fff;float:left;border-top-left-radius:0}
+.saya{
+  background:#dcf8c6;
+  float:right;
+  border-bottom-right-radius:0;
+  margin-right:0;
+  margin-left:auto;
+}
+.lawan{
+  background:#fff;
+  float:left;
+  border-bottom-left-radius:0;
+}
 
 .pesan.shift-left{
   transform:translateX(-35px);
@@ -258,12 +269,14 @@ html,body{height:100%;font-family:Arial;background:#ece5dd}
 }
 
 .timestamp{
-  font-size:10px;
-  color:#999;
+  font-size:11px;
+  color:#667781;
   text-align:right;
   margin-top:2px;
   float:right;
   margin-left:8px;
+  letter-spacing:0.3px;
+  font-weight:500;
 }
 
 /* MENU BUBBLE */
@@ -550,64 +563,183 @@ html,body{height:100%;font-family:Arial;background:#ece5dd}
   100% { opacity: 1; }
 }
 
-/* PESAN SUARA */
-.voice-message-container {
+/* PESAN SUARA WHATSAPP STYLE */
+.voice-message {
   display: flex;
   align-items: center;
-  padding: 8px 0;
+  min-width: 160px;
+  max-width: 300px;
+  height: 18px;
+  position: relative;
 }
 
-.voice-play-button {
-  width: 32px;
-  height: 32px;
+.saya .voice-message {
+  justify-content: flex-end;
+}
+
+.lawan .voice-message {
+  justify-content: flex-start;
+}
+
+/* Container utama pesan suara */
+.voice-container {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-width: 140px;
+  max-width: 250px;
+  position: relative;
+}
+
+/* Tombol play/pause WhatsApp style */
+.voice-play-btn {
+  width: 36px;
+  height: 18px;
   border-radius: 50%;
   border: none;
-  background: #25D366;
-  color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
+  margin-right: 12px;
   flex-shrink: 0;
-  font-size: 12px;
-}
-
-.voice-waveform {
-  flex: 1;
-  height: 4px;
-  background: rgba(37, 211, 102, 0.3);
-  border-radius: 2px;
   position: relative;
-  overflow: hidden;
+  z-index: 3;
+  transition: transform 0.1s ease;
 }
 
-.voice-waveform.active {
-  background: linear-gradient(90deg, #25D366 0%, rgba(37, 211, 102, 0.3) 100%);
+.saya .voice-play-btn {
+  background: #00a884;
+  color: white;
 }
 
-.voice-duration {
+.lawan .voice-play-btn {
+  background: white;
+  color: #3b4a54;
+  box-shadow: 0 1px 0.5px rgba(0,0,0,.13);
+}
+
+.voice-play-btn:hover {
+  transform: scale(1.05);
+}
+
+.voice-play-btn.playing {
+  background: #075e54;
+}
+
+.lawan .voice-play-btn.playing {
+  background: #075e54;
+  color: white;
+}
+
+.voice-play-btn .play-icon {
+  font-size: 13px;
+  margin-left: 3px;
+  margin-top: -1px;
+}
+
+.voice-play-btn .pause-icon {
   font-size: 11px;
-  color: #666;
-  margin-left: 8px;
-  min-width: 35px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+/* Waveform container */
+.voice-waveform-container {
+  flex: 1;
+  position: relative;
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+/* Waveform bars */
+.voice-waveform {
+  position: relative;
+  height: 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  margin-right: 8px;
+}
+
+.wave-bar {
+  width: 2px;
+  border-radius: 1px;
+  transition: all 0.3s ease; /* Perpanjang durasi transition */
+  position: relative;
+}
+
+.saya .wave-bar {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.lawan .wave-bar {
+  background: rgba(11, 20, 26, 0.3);
+}
+
+.wave-bar.active {
+  background: #00a884;
+}
+
+.lawan .wave-bar.active {
+  background: #075e54;
+}
+
+/* Progress overlay */
+.voice-progress-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(0, 168, 132, 0.15);
+  width: 0%;
+  transition: width 0.05s linear; /* Percepat transition */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lawan .voice-progress-overlay {
+  background: rgba(7, 94, 84, 0.1);
+}
+
+/* Durasi dan timestamp */
+.voice-duration {
+  font-size: 13px;
+  font-weight: 500;
+  color: #667781;
+  min-width: 40px;
   text-align: right;
+  letter-spacing: 0.3px;
 }
 
-.saya .voice-play-button {
-  background: #25D366;
+.saya .voice-duration {
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.saya .voice-waveform {
-  background: rgba(37, 211, 102, 0.3);
+/* Progress indicator */
+.voice-progress-indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 24px;
+  background: #00a884;
+  transform: translateY(-50%);
+  z-index: 10;
+  border-radius: 1.5px;
+  transition: left 0.05s linear; /* Tambahkan transition untuk pergerakan */
 }
 
-.lawan .voice-play-button {
-  background: #128c7e;
+.lawan .voice-progress-indicator {
+  background: #075e54;
 }
 
-.lawan .voice-waveform {
-  background: rgba(18, 140, 126, 0.3);
+/* Playback line animation */
+@keyframes playbackLine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(1000%); }
 }
 
 /* INDIKATOR REKAMAN */
@@ -1404,6 +1536,146 @@ onAuthStateChanged(auth,async user=>{
   }
 });
 
+/* FUNGSI UNTUK MEMBUAT GELOMBANG SUARA WHATSAPP */
+function createWhatsAppVoiceWaveform(isMe, duration = 10) {
+  const container = document.createElement('div');
+  container.className = 'voice-waveform-container';
+  
+  // Progress overlay
+  const progressOverlay = document.createElement('div');
+  progressOverlay.className = 'voice-progress-overlay';
+  container.appendChild(progressOverlay);
+  
+  // Waveform bars
+  const waveform = document.createElement('div');
+  waveform.className = 'voice-waveform';
+  
+  // Buat bar dengan pola seperti WhatsApp
+  const barCount = 35;
+  const barPattern = [3, 4, 5, 7, 9, 11, 13, 15, 17, 19, 20, 19, 17, 15, 13, 11, 9, 7, 5, 4, 3];
+  
+  for (let i = 0; i < barCount; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    
+    // Tinggi acak dengan pola gelombang
+    const patternIndex = i % barPattern.length;
+    let height = barPattern[patternIndex];
+    
+    // Tambahkan sedikit variasi
+    height += Math.random() * 3 - 1.5;
+    height = Math.max(3, Math.min(20, height));
+    
+    bar.style.height = `${height}px`;
+    
+    waveform.appendChild(bar);
+  }
+  
+  // Progress indicator
+  const progressIndicator = document.createElement('div');
+  progressIndicator.className = 'voice-progress-indicator';
+  container.appendChild(progressIndicator);
+  
+  container.appendChild(waveform);
+  
+  return { container, progressOverlay, waveform, progressIndicator, bars: waveform.children };
+}
+
+/* FUNGSI UNTUK MENGUPDATE WAVEFORM WHATSAPP SAAT AUDIO BERMAIN */
+function updateWhatsAppWaveformDuringPlayback(audio, waveformContainer) {
+  const { progressOverlay, progressIndicator, bars } = waveformContainer;
+  const totalBars = bars.length;
+  
+  // Reset progress saat audio dimulai
+  progressOverlay.style.width = '0%';
+  progressIndicator.style.display = 'none';
+  
+  // Reset semua bar ke non-active
+  for (let i = 0; i < totalBars; i++) {
+    bars[i].classList.remove('active');
+  }
+  
+  let animationFrameId = null;
+  
+  // Update progress dan bar yang aktif
+  const updateProgress = () => {
+    if (audio.paused || audio.ended) {
+      cancelAnimationFrame(animationFrameId);
+      return;
+    }
+    
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progressOverlay.style.width = `${progressPercent}%`;
+    
+    // Position indicator
+    progressIndicator.style.left = `${progressPercent}%`;
+    progressIndicator.style.display = 'block';
+    
+    // Update active bars
+    const activeBarIndex = Math.floor((progressPercent / 100) * totalBars);
+    
+    for (let i = 0; i < totalBars; i++) {
+      if (i <= activeBarIndex) {
+        bars[i].classList.add('active');
+      } else {
+        bars[i].classList.remove('active');
+      }
+    }
+    
+    animationFrameId = requestAnimationFrame(updateProgress);
+  };
+  
+  // Event listeners
+  const handlePlay = () => {
+    // Reset sebelum mulai
+    progressOverlay.style.width = '0%';
+    progressIndicator.style.display = 'block';
+    progressIndicator.style.left = '0%';
+    
+    // Mulai update progress
+    cancelAnimationFrame(animationFrameId);
+    updateProgress();
+  };
+  
+  const handlePause = () => {
+    cancelAnimationFrame(animationFrameId);
+  };
+  
+  const handleEnded = () => {
+    cancelAnimationFrame(animationFrameId);
+    progressIndicator.style.display = 'none';
+  };
+  
+  const handleSeeked = () => {
+    cancelAnimationFrame(animationFrameId);
+    updateProgress();
+  };
+  
+  const handleTimeUpdate = () => {
+    // Update real-time untuk responsif
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progressOverlay.style.width = `${progressPercent}%`;
+    progressIndicator.style.left = `${progressPercent}%`;
+  };
+  
+  // Attach event listeners
+  audio.addEventListener('play', handlePlay);
+  audio.addEventListener('pause', handlePause);
+  audio.addEventListener('ended', handleEnded);
+  audio.addEventListener('seeked', handleSeeked);
+  audio.addEventListener('timeupdate', handleTimeUpdate);
+  
+  // Cleanup function
+  return () => {
+    cancelAnimationFrame(animationFrameId);
+    audio.removeEventListener('play', handlePlay);
+    audio.removeEventListener('pause', handlePause);
+    audio.removeEventListener('ended', handleEnded);
+    audio.removeEventListener('seeked', handleSeeked);
+    audio.removeEventListener('timeupdate', handleTimeUpdate);
+  };
+}
+
 /* CHAT LISTENER */
 function listenChat(){
   const q=query(collection(db,"pesan"),orderBy("waktu"));
@@ -1446,23 +1718,26 @@ function listenChat(){
   });
 }
 
-/* RENDER MESSAGE */
-function renderMessage(d){
-  const data=d.data();
-  const isMe=data.user===username;
+/* RENDER MESSAGE DENGAN PESAN SUARA WHATSAPP STYLE */
+function renderMessage(d) {
+  const data = d.data();
+  const isMe = data.user === username;
 
-  const msgDiv=document.createElement("div");
-  msgDiv.className="pesan "+(isMe?"saya":"lawan");
-  msgDiv.id="msg-"+d.id;
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "pesan " + (isMe ? "saya" : "lawan");
+  msgDiv.id = "msg-" + d.id;
   msgDiv.dataset.timestamp = data.waktu?.toDate ? data.waktu.toDate().getTime() : Date.now();
   
-  let htmlContent = `<small>${sanitize(data.user)}</small>`;
+  // Nama pengguna
+  const userLabel = document.createElement("small");
+  userLabel.textContent = sanitize(data.user);
+  msgDiv.appendChild(userLabel);
   
-  if(data.reply){
-    const replyPreview=document.createElement("div");
-    replyPreview.className="reply-preview";
-    replyPreview.textContent=`${data.reply.user}: ${data.reply.text}`;
-    replyPreview.onclick = ()=> scrollToMessage(data.reply.id);
+  if(data.reply) {
+    const replyPreview = document.createElement("div");
+    replyPreview.className = "reply-preview";
+    replyPreview.textContent = `${data.reply.user}: ${data.reply.text}`;
+    replyPreview.onclick = () => scrollToMessage(data.reply.id);
     msgDiv.appendChild(replyPreview);
   }
   
@@ -1473,64 +1748,103 @@ function renderMessage(d){
     data.files.forEach(file => {
       // Periksa apakah ini pesan suara
       if(data.isVoiceMessage || file.type.includes('audio')) {
+        // Buat container untuk pesan suara
+        const voiceMessageContainer = document.createElement("div");
+        voiceMessageContainer.className = "voice-message";
+        
         const voiceContainer = document.createElement("div");
-        voiceContainer.className = "voice-message-container";
+        voiceContainer.className = "voice-container";
         
+        // Tombol play/pause
         const playButton = document.createElement("button");
-        playButton.className = "voice-play-button";
-        playButton.innerHTML = "▶";
+        playButton.className = "voice-play-btn";
+        playButton.innerHTML = '<span class="play-icon">▶</span><span class="pause-icon" style="display:none">❚❚</span>';
         
+        // Container untuk waveform WhatsApp style
+        const waveformContainer = createWhatsAppVoiceWaveform(isMe, data.voiceDuration || 10);
+        
+        // Durasi
+        const durationText = document.createElement("div");
+        durationText.className = "voice-duration";
+        durationText.textContent = formatVoiceDuration(data.voiceDuration || 1);
+        
+        voiceContainer.appendChild(playButton);
+        voiceContainer.appendChild(waveformContainer.container);
+        voiceContainer.appendChild(durationText);
+        voiceMessageContainer.appendChild(voiceContainer);
+        
+        // Logic untuk memutar audio
         let currentAudio = null;
-        playButton.onclick = function() {
-          if (currentAudio && !currentAudio.paused) {
+        let isPlaying = false;
+        let cleanupWaveform = null;
+        
+        playButton.onclick = function(e) {
+          e.stopPropagation();
+          
+          if (currentAudio && isPlaying) {
+            // Jeda audio
             currentAudio.pause();
-            playButton.innerHTML = "▶";
-            playButton.style.background = isMe ? '#25D366' : '#128c7e';
+            isPlaying = false;
+            playButton.classList.remove('playing');
+            playButton.querySelector('.play-icon').style.display = 'block';
+            playButton.querySelector('.pause-icon').style.display = 'none';
           } else {
-            if (currentAudio) {
-              currentAudio.currentTime = 0;
+            if (!currentAudio) {
+              // Buat audio baru
+              currentAudio = new Audio(file.url);
+              currentAudio.preload = 'auto'; // Ubah ke 'auto' untuk preload lebih baik
+              
+              // Setup waveform update WhatsApp style
+              cleanupWaveform = updateWhatsAppWaveformDuringPlayback(currentAudio, waveformContainer);
+              
+              // Handle ketika audio selesai
+              currentAudio.onended = function() {
+                isPlaying = false;
+                playButton.classList.remove('playing');
+                playButton.querySelector('.play-icon').style.display = 'block';
+                playButton.querySelector('.pause-icon').style.display = 'none';
+                waveformContainer.progressOverlay.style.width = '0%';
+                waveformContainer.progressIndicator.style.display = 'none';
+                
+                // Reset semua bar
+                for (let bar of waveformContainer.bars) {
+                  bar.classList.remove('active');
+                }
+              };
+              
+              currentAudio.onpause = function() {
+                isPlaying = false;
+                playButton.classList.remove('playing');
+                playButton.querySelector('.play-icon').style.display = 'block';
+                playButton.querySelector('.pause-icon').style.display = 'none';
+              };
+              
+              // Preload audio untuk responsif
+              currentAudio.load();
             }
-            currentAudio = new Audio(file.url);
+            
+            // Putar audio
             currentAudio.play();
-            playButton.innerHTML = "⏸";
-            playButton.style.background = "#FF9800";
-            
-            currentAudio.onended = function() {
-              playButton.innerHTML = "▶";
-              playButton.style.background = isMe ? '#25D366' : '#128c7e';
-            };
-            
-            currentAudio.onpause = function() {
-              playButton.innerHTML = "▶";
-              playButton.style.background = isMe ? '#25D366' : '#128c7e';
-            };
+            isPlaying = true;
+            playButton.classList.add('playing');
+            playButton.querySelector('.play-icon').style.display = 'none';
+            playButton.querySelector('.pause-icon').style.display = 'block';
           }
         };
         
-        const waveform = document.createElement("div");
-        waveform.className = "voice-waveform";
+        // Tambahkan cleanup ketika pesan dihapus
+        msgDiv.addEventListener('DOMNodeRemoved', function() {
+          if (cleanupWaveform) {
+            cleanupWaveform();
+          }
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+          }
+        });
         
-        const waveLine = document.createElement("div");
-        waveLine.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 100%;
-          width: 0%;
-          background: ${isMe ? '#25D366' : '#128c7e'};
-          transition: width 0.1s linear;
-        `;
-        waveform.appendChild(waveLine);
+        fileContainer.appendChild(voiceMessageContainer);
         
-        const duration = document.createElement("div");
-        duration.className = "voice-duration";
-        duration.textContent = formatVoiceDuration(data.voiceDuration || 1);
-        
-        voiceContainer.appendChild(playButton);
-        voiceContainer.appendChild(waveform);
-        voiceContainer.appendChild(duration);
-        
-        fileContainer.appendChild(voiceContainer);
       } else if(file.type.startsWith('image/')) {
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
@@ -1550,6 +1864,7 @@ function renderMessage(d){
         filePreview.appendChild(fileInfo);
         
         fileContainer.appendChild(filePreview);
+        
       } else if(file.type.startsWith('video/')) {
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
@@ -1569,7 +1884,9 @@ function renderMessage(d){
         filePreview.appendChild(fileInfo);
         
         fileContainer.appendChild(filePreview);
-      } else if(file.type.startsWith('audio/')) {
+        
+      } else if(file.type.startsWith('audio/') && !data.isVoiceMessage) {
+        // Untuk file audio biasa (bukan pesan suara)
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
         
@@ -1587,7 +1904,9 @@ function renderMessage(d){
         filePreview.appendChild(fileInfo);
         
         fileContainer.appendChild(filePreview);
+        
       } else {
+        // Untuk file lainnya
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
         
@@ -1607,29 +1926,31 @@ function renderMessage(d){
     msgDiv.appendChild(fileContainer);
   }
   
-  if(data.teks && data.teks.trim() !== '') {
-    const textDiv=document.createElement("div");
-    textDiv.className="msg";
-    textDiv.textContent=data.teks;
+  if(data.teks && data.teks.trim() !== '' && !data.isVoiceMessage) {
+    const textDiv = document.createElement("div");
+    textDiv.className = "msg";
+    textDiv.textContent = data.teks;
     msgDiv.appendChild(textDiv);
   }
   
-  if(data.edited){
-    const editedSpan=document.createElement("span");
-    editedSpan.className="edited";
-    editedSpan.textContent="(diedit)";
+  if(data.edited && !data.isVoiceMessage){
+    const editedSpan = document.createElement("span");
+    editedSpan.className = "edited";
+    editedSpan.textContent = "(diedit)";
     msgDiv.appendChild(editedSpan);
   }
   
-  const timeSpan=document.createElement("span");
-  timeSpan.className="timestamp";
-  timeSpan.textContent=formatTime(data.waktu);
+  // Timestamp
+  const timeSpan = document.createElement("span");
+  timeSpan.className = "timestamp";
+  timeSpan.textContent = formatTime(data.waktu);
   msgDiv.appendChild(timeSpan);
   
-  const menu=document.createElement("div");
-  menu.className="bubble-menu "+(isMe?"outside":"inside");
+  // Menu bubble
+  const menu = document.createElement("div");
+  menu.className = "bubble-menu " + (isMe ? "outside" : "inside");
   
-  menu.innerHTML=isMe
+  menu.innerHTML = isMe
     ? `<button title="Balas">↩</button>
        <button title="Edit">✎</button>
        <button title="Hapus">🗑</button>`
@@ -1652,53 +1973,53 @@ function renderMessage(d){
 };
 
   if(isMe){
-    menu.children[1].onclick=async()=>{
+    menu.children[1].onclick = async() => {
       closeMenus();
-      const msgElement=msgDiv.querySelector(".msg");
+      const msgElement = msgDiv.querySelector(".msg");
       if(!msgElement) return;
       
-      const originalText=msgElement.textContent;
+      const originalText = msgElement.textContent;
       
-      msgElement.contentEditable=true;
+      msgElement.contentEditable = true;
       msgElement.focus();
       
-      const range=document.createRange();
+      const range = document.createRange();
       range.selectNodeContents(msgElement);
-      const sel=window.getSelection();
+      const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
       
-      msgElement.onkeydown=async e=>{
-        if(e.key==="Enter" && !e.shiftKey){
+      msgElement.onkeydown = async e => {
+        if(e.key === "Enter" && !e.shiftKey){
           e.preventDefault();
-          msgElement.contentEditable=false;
-          const newText=msgElement.textContent.trim();
-          if(newText && newText!==originalText){
+          msgElement.contentEditable = false;
+          const newText = msgElement.textContent.trim();
+          if(newText && newText !== originalText){
             await updateDoc(doc(db,"pesan",d.id),{
-              teks:newText,
-              edited:true
+              teks: newText,
+              edited: true
             });
           }
         }
-        if(e.key==="Escape"){
-          msgElement.contentEditable=false;
-          msgElement.textContent=originalText;
+        if(e.key === "Escape"){
+          msgElement.contentEditable = false;
+          msgElement.textContent = originalText;
         }
       };
       
-      msgElement.onblur=async()=>{
-        msgElement.contentEditable=false;
-        const newText=msgElement.textContent.trim();
-        if(newText && newText!==originalText){
+      msgElement.onblur = async() => {
+        msgElement.contentEditable = false;
+        const newText = msgElement.textContent.trim();
+        if(newText && newText !== originalText){
           await updateDoc(doc(db,"pesan",d.id),{
-            teks:newText,
-            edited:true
+            teks: newText,
+            edited: true
           });
         }
       };
     };
 
-    menu.children[2].onclick=async()=>{
+    menu.children[2].onclick = async() => {
       closeMenus();
       if(confirm("Hapus pesan ini?")){
         if(data.files && data.files.length > 0) {
@@ -1723,11 +2044,11 @@ function renderMessage(d){
 
   msgDiv.appendChild(menu);
 
-  msgDiv.oncontextmenu=e=>{
+  msgDiv.oncontextmenu = e => {
     e.preventDefault();
     closeMenus();
     if(isMe) msgDiv.classList.add("shift-left");
-    menu.style.display="flex";
+    menu.style.display = "flex";
   };
 
   // Tambahkan pesan ke chat box
@@ -1736,19 +2057,19 @@ function renderMessage(d){
 
 /* SCROLL TO MESSAGE */
 function scrollToMessage(id){
-  let attempts=0;
-  const interval = setInterval(()=>{
-    const target = document.getElementById("msg-"+id);
-    if(target || attempts>10){
+  let attempts = 0;
+  const interval = setInterval(() => {
+    const target = document.getElementById("msg-" + id);
+    if(target || attempts > 10){
       clearInterval(interval);
       if(target){
-        target.scrollIntoView({behavior:"smooth", block:"center"});
+        target.scrollIntoView({behavior: "smooth", block: "center"});
         target.classList.add("highlight");
-        setTimeout(()=> target.classList.remove("highlight"),1200);
+        setTimeout(() => target.classList.remove("highlight"), 1200);
       }
     }
     attempts++;
-  },50);
+  }, 50);
 }
 
 /* PREVIEW MODAL */
@@ -1776,15 +2097,15 @@ window.closePreview = () => {
 
 /* CLOSE ALL MENUS */
 function closeMenus(){
-  document.querySelectorAll(".bubble-menu").forEach(m=>{
-    m.style.display="none";
+  document.querySelectorAll(".bubble-menu").forEach(m => {
+    m.style.display = "none";
     m.parentElement.classList.remove("shift-left");
   });
 }
-document.addEventListener("click",closeMenus);
+document.addEventListener("click", closeMenus);
 
 /* AUTO-RESIZE TEXTAREA */
-input.addEventListener("input",function(){
+input.addEventListener("input", function() {
   autoResizeTextarea(this);
   updateSend();
 });
