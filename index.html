@@ -9,22 +9,24 @@
 /* RESET & MOBILE FIX */
 *{margin:0;padding:0;box-sizing:border-box}
 
+/* CSS FIX: Mengunci body agar tidak scroll, hanya elemen dalam #app yang bisa diatur */
 html, body {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  position: fixed;
+  overflow: hidden; /* Mencegah scroll pada body utama */
+  position: fixed; /* Mencegah efek 'bouncing' berlebih di iOS */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: #ece5dd;
 }
 
+/* CSS FIX: Menggunakan dvh (Dynamic Viewport Height) untuk HP */
 #app {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  height: 100dvh;
+  height: 100%; /* Fallback */
+  height: 100dvh; /* Mengikut tinggi layar asli HP termasuk/tanpa browser bar */
   width: 100%;
   overflow: hidden;
 }
@@ -38,45 +40,61 @@ html, body {
   justify-content:space-between;
   align-items:center;
   box-shadow:0 2px 5px rgba(0,0,0,.1);
-  flex-shrink: 0;
+  flex-shrink: 0; /* Mencegah header mengecil/gepeng */
   z-index: 10;
 }
 
-#user-info{ font-size:16px; font-weight:500; }
+#user-info{
+  font-size:16px;
+  font-weight:500;
+}
 
+/* TOMBOL LOGOUT */
 #logoutBtn{
-  background:transparent; border:none; color:#fff; font-size:20px;
-  width:36px; height:36px; border-radius:50%; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:20px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   transition:background .15s ease;
 }
 #logoutBtn:hover{background:rgba(255,255,255,.15);}
+#logoutBtn:active{background:rgba(255,255,255,.25);}
 
 /* LOADING & EMPTY STATES */
-.loading, .empty-state{ text-align:center; padding:40px 20px; color:#666; }
-.empty-state-icon{ font-size:48px; margin-bottom:16px; }
-.empty-state h3{ margin:8px 0; color:#333; }
-.empty-state p{ font-size:14px; opacity:.8; }
-
-/* LOADING HISTORY INDICATOR */
-.loading-history {
-  text-align: center;
-  padding: 10px;
-  color: #666;
-  font-size: 12px;
-  background: rgba(255,255,255,0.5);
-  margin-bottom: 5px;
-  border-radius: 4px;
+.loading, .empty-state{
+  text-align:center;
+  padding:40px 20px;
+  color:#666;
+}
+.empty-state-icon{
+  font-size:48px;
+  margin-bottom:16px;
+}
+.empty-state h3{
+  margin:8px 0;
+  color:#333;
+}
+.empty-state p{
+  font-size:14px;
+  opacity:.8;
 }
 
 /* CHAT CONTAINER */
 #chat-box{
   flex:1;
-  overflow-y:auto;
+  overflow-y:auto; /* Scroll vertikal aktif di sini */
   padding:10px;
+  /* Optimasi scroll sentuh untuk Mobile */
   -webkit-overflow-scrolling: touch; 
-  scroll-behavior: auto; /* Ubah ke auto agar manipulasi scroll history lebih mulus */
-  background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+  scroll-behavior: smooth;
+  background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
   background-attachment:fixed;
 }
 
@@ -84,7 +102,7 @@ html, body {
 .pesan{
   position:relative;
   max-width:70%;
-  padding:3px 12px;
+  padding: 8px 12px;
   margin:6px 0;
   border-radius:7.5px;
   font-size:14px;
@@ -93,116 +111,684 @@ html, body {
   word-wrap:break-word;
   box-shadow:0 1px 0.5px rgba(0,0,0,.13);
 }
-.saya{ background:#dcf8c6; float:right; border-bottom-right-radius:0; margin-right:0; margin-left:auto; }
-.lawan{ background:#fff; float:left; border-bottom-left-radius:0; }
+.saya{
+  background:#dcf8c6;
+  float:right;
+  border-bottom-right-radius:0;
+  margin-right:0;
+  margin-left:auto;
+}
+.lawan{
+  background:#fff;
+  float:left;
+  border-bottom-left-radius:0;
+}
 
-.pesan.shift-left{ transform:translateX(-35px); transition:transform .15s ease; }
+.pesan.shift-left{
+  transform:translateX(-35px);
+  transition:transform .15s ease;
+}
 
-.pesan small{ display:block; font-size:11px; font-weight:bold; color:#555; margin-bottom:4px; }
+.pesan small{
+  display:block;
+  font-size:11px;
+  font-weight:bold;
+  color:#555;
+  margin-bottom:4px;
+}
 
 /* BUBBLE STATUS LOGIN */
 .status-pesan {
-  position: relative; max-width: 27%; padding: 6px 12px; margin: 4px auto 8px auto;
-  border-radius: 15px; font-size: 12px; line-height: 1.3; text-align: center;
-  clear: both; word-wrap: break-word; animation: fadeInUp 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: block !important;
+  position: relative;
+  max-width: 27%;
+  padding: 6px 12px;
+  margin: 4px auto 8px auto;
+  border-radius: 15px;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  clear: both;
+  word-wrap: break-word;
+  animation: fadeInUp 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
-.status-pesan.login { background: rgba(227, 242, 253, 0.9); border: 1px solid #90caf9; color: #1565c0; }
-.status-pesan.logout { background: rgba(245, 245, 245, 0.9); border: 1px solid #e0e0e0; color: #616161; }
-.status-pesan .user-name { font-weight: bold; font-size: 11px; margin-right: 4px; }
-.status-pesan .status-text { font-style: italic; font-size: 11px; margin-right: 6px; }
-.status-pesan .timestamp { font-size: 10px; color: rgba(0,0,0,0.6); display: inline-block; margin-left: 4px; padding-left: 6px; border-left: 1px solid rgba(0,0,0,0.2); }
 
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.status-pesan.login {
+  background: rgba(227, 242, 253, 0.9);
+  border: 1px solid #90caf9;
+  color: #1565c0;
+}
+
+.status-pesan.logout {
+  background: rgba(245, 245, 245, 0.9);
+  border: 1px solid #e0e0e0;
+  color: #616161;
+}
+
+/* STYLE UNTUK CENTANG */
+.status-read {
+  font-size: 10px;
+  margin-left: 4px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.centang-abu { color: #8696a0; }
+.centang-biru { color: #53bdeb; }
+
+.status-pesan .user-name {
+  font-weight: bold;
+  font-size: 11px;
+  margin-right: 4px;
+}
+
+.status-pesan .status-text {
+  font-style: italic;
+  font-size: 11px;
+  margin-right: 6px;
+}
+
+.status-pesan .timestamp {
+  font-size: 10px;
+  color: rgba(0,0,0,0.6);
+  font-style: normal;
+  display: inline-block;
+  margin-left: 4px;
+  padding-left: 6px;
+  border-left: 1px solid rgba(0,0,0,0.2);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* FILE CONTAINER */
-.file-container { margin: 8px 0; max-width: 100%; border-radius: 8px; overflow: hidden; }
-.file-preview { position: relative; max-width: 300px; }
-.file-preview img, .file-preview video { max-width: 100%; max-height: 250px; border-radius: 8px; display: block; cursor: pointer; }
-.file-info { background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; margin-top: 4px; }
-.file-name { font-size: 12px; font-weight: bold; color: #333; word-break: break-all; }
-.file-size { font-size: 11px; color: #666; margin-top: 2px; }
-.file-download { display: inline-block; background: #128c7e; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; margin-top: 6px; }
+.file-container {
+  margin: 8px 0;
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.file-preview {
+  position: relative;
+  max-width: 300px;
+}
+
+.file-preview img, .file-preview video {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  display: block;
+  cursor: pointer;
+}
+
+.file-info {
+  background: rgba(0,0,0,0.05);
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.file-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.file-download {
+  display: inline-block;
+  background: #128c7e;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  margin-top: 6px;
+  transition: background .2s;
+}
+
+.file-download:hover {
+  background: #075e54;
+}
 
 /* HIGHLIGHT PESAN */
-.pesan.highlight{ animation:flash .8s ease; }
-@keyframes flash{ 0%{background:#fff59d} 100%{background:inherit} }
+.pesan.highlight{
+  animation:flash .8s ease;
+}
+@keyframes flash{
+  0%{background:#fff59d}
+  100%{background:inherit}
+}
 
 /* REPLY PREVIEW */
 .reply-preview{
-  background:#f1f1f1; padding:4px 8px; border-left:3px solid #128c7e; margin-bottom:1px;
-  font-size:12px; cursor:pointer; border-radius:4px; max-width:100%;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  background:#f1f1f1;
+  padding:4px 8px;
+  border-left:3px solid #128c7e;
+  margin-bottom:1px;
+  font-size:12px;
+  cursor:pointer;
+  border-radius:4px;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
-.reply-preview:hover{ background:#e0f2f1; }
-.edited{ font-size:10px; color:#666; margin-left:6px; font-style:italic; }
-.timestamp{ font-size:11px; color:#667781; text-align:right; margin-top:2px; float:right; margin-left:8px; letter-spacing:0.3px; font-weight:500; }
+.reply-preview:hover{
+  background:#e0f2f1;
+}
+
+.edited{
+  font-size:10px;
+  color:#666;
+  margin-left:6px;
+  font-style:italic;
+}
+
+.timestamp{
+  font-size: 11px;
+  color: #667781;
+  text-align:right;
+  margin-left:8px;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+/* Container untuk membungkus Jam dan Centang */
+.status-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px; /* Jarak antara jam dan centang */
+  margin-top: 2px;
+  float: right; /* Tetap di kanan bawah */
+  margin-left: 8px;
+}
+
+.status-read {
+  font-size: 14px; /* Ukuran centang sedikit lebih besar agar jelas */
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
 
 /* MENU BUBBLE */
-.bubble-menu{ position:absolute; top:6px; bottom:6px; display:none; flex-direction:column; justify-content:center; gap:4px; z-index:1000 }
+.bubble-menu{
+  position:absolute;
+  top:6px;
+  bottom:6px;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+  z-index:1000
+}
 .bubble-menu.outside{right:-32px}
-.bubble-menu.inside{ right:6px; animation:slideOut .15s ease forwards }
-@keyframes slideOut{ from{opacity:0;transform:translateX(0)} to{opacity:1;transform:translateX(38px)} }
-.bubble-menu button{ width:24px; height:24px; border-radius:50%; border:none; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); cursor:pointer; font-size:12px; padding:0; display:flex; align-items:center; justify-content:center; }
+.bubble-menu.inside{
+  right:6px;
+  animation:slideOut .15s ease forwards
+}
+@keyframes slideOut{
+  from{opacity:0;transform:translateX(0)}
+  to{opacity:1;transform:translateX(38px)}
+}
+
+.bubble-menu button{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:none;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);
+  cursor:pointer;
+  font-size:12px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.bubble-menu button:hover{
+  background:#e0f2f1;
+  transform:scale(1.15);
+  box-shadow:0 2px 5px rgba(0,0,0,.2);
+}
 
 /* INPUT AREA */
-#input-area{ background:#f0f0f0; padding:12px 16px; border-top:1px solid #ddd; flex-shrink: 0; z-index: 10; }
-#reply-bar{ display:none; background:#e0f2f1; border-left:4px solid #128c7e; padding:8px 12px; margin-bottom:8px; justify-content:space-between; align-items:center; border-radius:4px; }
-#reply-text{ font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85%; flex:1; }
-#reply-bar span{ cursor:pointer; font-weight:bold; color:#128c7e; padding:4px; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; }
+#input-area{
+  background:#f0f0f0;
+  padding:12px 16px;
+  border-top:1px solid #ddd;
+  flex-shrink: 0; /* Mencegah input area hilang */
+  z-index: 10;
+}
 
-#input-row{ display:flex; align-items:center; gap:8px; }
-#input{ flex:1; padding:12px 16px; border-radius:24px; border:1px solid #ccc; outline:none; font-size:14px; background:#fff; min-height:44px; max-height: 120px; resize:none; font-family:inherit; }
-#input:focus{ border-color:#128c7e; box-shadow:0 0 0 2px rgba(18,140,126,.1); }
+/* REPLY BAR */
+#reply-bar{
+  display:none;
+  background:#e0f2f1;
+  border-left:4px solid #128c7e;
+  padding:8px 12px;
+  margin-bottom:8px;
+  justify-content:space-between;
+  align-items:center;
+  border-radius:4px;
+}
+#reply-text{
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:85%;
+  flex:1;
+}
+#reply-bar span{
+  cursor:pointer;
+  font-weight:bold;
+  color:#128c7e;
+  padding:4px;
+  border-radius:50%;
+  width:24px;
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#reply-bar span:hover{
+  background:rgba(0,0,0,.1);
+}
 
-/* BUTTONS */
-#voiceBtn, #fileBtn, #sendBtn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s ease; flex-shrink: 0; color: #fff; }
-#voiceBtn { background: #128c7e; display: none; }
-#voiceBtn.recording { background: #FF4444; animation: pulse 1.5s infinite; }
-#fileBtn { background: #128c7e; }
-#sendBtn { background: #128c7e; }
-#sendBtn:disabled { background:#b2dfdb; cursor:not-allowed; }
+/* INPUT ROW */
+#input-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 
-/* MODAL & PREVIEWS */
-#preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-#preview-content { max-width: 90%; max-height: 90%; border-radius: 8px; overflow: hidden; }
-#preview-content img, #preview-content video { max-width: 100%; max-height: 80vh; display: block; }
-#close-preview { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; background: rgba(0,0,0,0.5); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-#upload-preview { display: none; background: #f8f8f8; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 2px dashed #128c7e; }
-.preview-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: white; border-radius: 4px; margin-bottom: 8px; }
-.preview-name { flex: 1; margin-left: 12px; font-size: 14px; word-break: break-all; }
-.preview-remove { color: #ff4444; cursor: pointer; font-size: 18px; margin-left: 8px; }
+/* INPUT */
+#input{
+  flex:1;
+  padding:12px 16px;
+  border-radius:24px;
+  border:1px solid #ccc;
+  outline:none;
+  font-size:14px;
+  background:#fff;
+  min-height:44px;
+  max-height: 120px; /* Batasi tinggi maksimal agar tidak menutupi layar */
+  resize:none;
+  font-family:inherit;
+}
+#input:focus{
+  border-color:#128c7e;
+  box-shadow:0 0 0 2px rgba(18,140,126,.1);
+}
 
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+/* TOMBOL VOICE */
+#voiceBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: #128c7e;
+  color: #fff;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
 
-/* VOICE MESSAGE STYLE */
-.voice-message { display: flex; align-items: center; min-width: 160px; max-width: 300px; height: 18px; position: relative; }
-.saya .voice-message { justify-content: flex-end; }
-.lawan .voice-message { justify-content: flex-start; }
-.voice-container { display: flex; align-items: center; height: 40px; min-width: 140px; max-width: 250px; position: relative; }
-.voice-play-btn { width: 36px; height: 18px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; position: relative; z-index: 3; transition: transform 0.1s ease; }
-.saya .voice-play-btn { background: #00a884; color: white; }
-.lawan .voice-play-btn { background: white; color: #3b4a54; box-shadow: 0 1px 0.5px rgba(0,0,0,.13); }
-.voice-play-btn:hover { transform: scale(1.05); }
-.voice-play-btn.playing { background: #075e54; }
-.lawan .voice-play-btn.playing { background: #075e54; color: white; }
-.voice-waveform-container { flex: 1; position: relative; height: 36px; display: flex; align-items: center; }
-.voice-waveform { position: relative; height: 20px; flex: 1; display: flex; align-items: center; gap: 1.5px; margin-right: 8px; }
-.wave-bar { width: 2px; border-radius: 1px; transition: all 0.3s ease; position: relative; }
-.saya .wave-bar { background: rgba(255, 255, 255, 0.6); }
-.lawan .wave-bar { background: rgba(11, 20, 26, 0.3); }
-.wave-bar.active { background: #00a884; }
-.lawan .wave-bar.active { background: #075e54; }
-.voice-progress-overlay { position: absolute; top: 0; left: 0; height: 100%; background: rgba(0, 168, 132, 0.15); width: 0%; transition: width 0.05s linear; pointer-events: none; z-index: 1; }
-.lawan .voice-progress-overlay { background: rgba(7, 94, 84, 0.1); }
-.voice-duration { font-size: 13px; font-weight: 500; color: #667781; min-width: 40px; text-align: right; letter-spacing: 0.3px; }
-.saya .voice-duration { color: rgba(255, 255, 255, 0.8); }
-.voice-progress-indicator { position: absolute; top: 50%; left: 0; width: 3px; height: 24px; background: #00a884; transform: translateY(-50%); z-index: 10; border-radius: 1.5px; transition: left 0.05s linear; }
-.lawan .voice-progress-indicator { background: #075e54; }
+#voiceBtn:hover {
+  background: #075e54;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
 
-/* RECORDING INDICATOR */
-#recording-indicator { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px; font-size: 14px; }
-.recording-dot { width: 12px; height: 12px; background: red; border-radius: 50%; animation: pulse 1s infinite; }
+#voiceBtn.recording {
+  background: #FF4444;
+  animation: pulse 1.5s infinite;
+}
+
+/* FILE UPLOAD BUTTON */
+#fileBtn{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:none;
+  background:#128c7e;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s ease;
+  flex-shrink:0;
+}
+#fileBtn:hover{
+  background:#555;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+
+/* SEND BUTTON */
+#sendBtn{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:none;
+  background:#128c7e;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s ease;
+  flex-shrink:0;
+}
+#sendBtn:hover{
+  background:#075e54;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+#sendBtn:active{
+  transform:scale(0.95);
+}
+#sendBtn:disabled{
+  background:#b2dfdb;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+/* MODAL PREVIEW */
+#preview-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+#preview-content {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#preview-content img, #preview-content video {
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
+}
+
+#close-preview {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.5);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* FILE UPLOAD PREVIEW */
+#upload-preview {
+  display: none;
+  background: #f8f8f8;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 2px dashed #128c7e;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.preview-name {
+  flex: 1;
+  margin-left: 12px;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.preview-remove {
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+/* ANIMASI PULSE */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* PESAN SUARA WHATSAPP STYLE */
+.voice-message {
+  display: flex;
+  align-items: center;
+  min-width: 160px;
+  max-width: 300px;
+  height: 18px;
+  position: relative;
+}
+
+.saya .voice-message {
+  justify-content: flex-end;
+}
+
+.lawan .voice-message {
+  justify-content: flex-start;
+}
+
+.voice-container {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  min-width: 140px;
+  max-width: 250px;
+  position: relative;
+}
+
+.voice-play-btn {
+  width: 36px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+  transition: transform 0.1s ease;
+}
+
+.saya .voice-play-btn {
+  background: #00a884;
+  color: white;
+}
+
+.lawan .voice-play-btn {
+  background: white;
+  color: #3b4a54;
+  box-shadow: 0 1px 0.5px rgba(0,0,0,.13);
+}
+
+.voice-play-btn:hover {
+  transform: scale(1.05);
+}
+
+.voice-play-btn.playing {
+  background: #075e54;
+}
+
+.lawan .voice-play-btn.playing {
+  background: #075e54;
+  color: white;
+}
+
+.voice-play-btn .play-icon {
+  font-size: 13px;
+  margin-left: 3px;
+  margin-top: -1px;
+}
+
+.voice-play-btn .pause-icon {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+
+/* Waveform container */
+.voice-waveform-container {
+  flex: 1;
+  position: relative;
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+/* Waveform bars */
+.voice-waveform {
+  position: relative;
+  height: 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  margin-right: 8px;
+}
+
+.wave-bar {
+  width: 2px;
+  border-radius: 1px;
+  transition: all 0.3s ease; 
+  position: relative;
+}
+
+.saya .wave-bar {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.lawan .wave-bar {
+  background: rgba(11, 20, 26, 0.3);
+}
+
+.wave-bar.active {
+  background: #00a884;
+}
+
+.lawan .wave-bar.active {
+  background: #075e54;
+}
+
+/* Progress overlay */
+.voice-progress-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(0, 168, 132, 0.15);
+  width: 0%;
+  transition: width 0.05s linear; 
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lawan .voice-progress-overlay {
+  background: rgba(7, 94, 84, 0.1);
+}
+
+/* Durasi dan timestamp */
+.voice-duration {
+  font-size: 13px;
+  font-weight: 500;
+  color: #667781;
+  min-width: 40px;
+  text-align: right;
+  letter-spacing: 0.3px;
+}
+
+.saya .voice-duration {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Progress indicator */
+.voice-progress-indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 24px;
+  background: #00a884;
+  transform: translateY(-50%);
+  z-index: 10;
+  border-radius: 1.5px;
+  transition: left 0.05s linear;
+}
+
+.lawan .voice-progress-indicator {
+  background: #075e54;
+}
+
+/* INDIKATOR REKAMAN */
+#recording-indicator {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.recording-dot {
+  width: 12px;
+  height: 12px;
+  background: red;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
 </style>
 </head>
 
@@ -258,7 +844,7 @@ from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, query, orderBy,
   onSnapshot, doc, getDoc, updateDoc, deleteDoc, serverTimestamp,
-  writeBatch, getDocs, where, limitToLast, endBefore
+  writeBatch, getDocs, where
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Import Supabase client
@@ -287,6 +873,7 @@ const db = getFirestore(app);
 let username="", replyData=null;
 let isSending = false;
 let filesToUpload = [];
+let isFirstLoad = true; // <--- TAMBAHKAN INI
 
 /* STATE REKAMAN SUARA */
 let mediaRecorder = null;
@@ -295,11 +882,6 @@ let isRecording = false;
 let recordingStartTime = null;
 let recordingTimer = null;
 let isUploadingVoice = false;
-
-/* STATE PAGINATION */
-let oldestMessageDoc = null; 
-let isLoadingOlder = false;  
-let allMessagesLoaded = false;
 
 /* ELEMENT */
 const chatBox=document.getElementById("chat-box");
@@ -313,7 +895,7 @@ const fileInput=document.getElementById("file-input");
 const uploadPreview=document.getElementById("upload-preview");
 const previewModal=document.getElementById("preview-modal");
 const previewContent=document.getElementById("preview-content");
-const logoutBtn=document.getElementById("logoutBtn");
+const logoutBtn=document.getElementById("logoutBtn"); // FIX: Ditambahkan deklarasi ini
 
 /* UTIL FUNCTIONS */
 function sanitize(text){
@@ -484,6 +1066,7 @@ async function startRecording(e) {
       audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
     });
     
+    // FIX: Deteksi dukungan MIME type untuk Safari/iOS
     let options = { audioBitsPerSecond: 128000 };
     if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
       options.mimeType = 'audio/webm;codecs=opus';
@@ -591,6 +1174,7 @@ async function processAndSendRecording(duration) {
     };
     if (replyData) { messageData.reply = replyData; replyData = null; replyBar.style.display = "none"; }
     await addDoc(collection(db, "pesan"), messageData);
+    setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 100);
   } catch (error) {
     console.error("Error sending voice message:", error);
     alert("Gagal mengirim pesan suara.");
@@ -770,118 +1354,52 @@ function updateWhatsAppWaveformDuringPlayback(audio, waveformContainer) {
   };
 }
 
-/* LISTEN CHAT (OPTIMIZED WITH PAGINATION) */
+/* LISTEN CHAT */
 function listenChat(){
-  // Load 50 pesan terakhir
-  const q = query(collection(db, "pesan"), orderBy("waktu"), limitToLast(50));
+  const q = query(collection(db, "pesan"), orderBy("waktu"));
   
   onSnapshot(q, s => {
     const loadingEl = chatBox.querySelector('.loading');
     if(loadingEl) loadingEl.remove();
-
-    const emptyState = chatBox.querySelector('.empty-state');
-    if(!s.empty && emptyState) emptyState.remove();
-
-    if(s.empty && chatBox.children.length === 0){
-      const es = document.createElement("div");
-      es.className = "empty-state";
-      es.innerHTML = `<div class="empty-state-icon">💬</div><h3>Belum ada percakapan</h3><p>Mulai percakapan dengan mengirim pesan pertama!</p>`;
-      chatBox.appendChild(es);
+    
+    // 1. Deteksi apakah user sedang berada di posisi paling bawah
+    const threshold = 100;
+    const isAtBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < threshold;
+    
+    // 2. Bersihkan chatBox sebelum render ulang
+    chatBox.innerHTML = ""; 
+    
+    if(s.empty){
+      isFirstLoad = false;
+      const emptyState = document.createElement("div");
+      emptyState.className = "empty-state";
+      emptyState.innerHTML = `<div class="empty-state-icon">💬</div><h3>Belum ada percakapan</h3>`;
+      chatBox.appendChild(emptyState);
       return;
     }
 
-    // Menggunakan docChanges untuk efisiensi
-    s.docChanges().forEach(change => {
-      if (change.type === "added") {
-        renderMessage(change.doc, chatBox);
-        
-        // Auto scroll ke bawah jika user sudah di bawah atau pesan dikirim sendiri
-        setTimeout(() => { 
-           const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 150;
-           if(isAtBottom || change.doc.data().user === username) {
-             chatBox.scrollTop = chatBox.scrollHeight;
-           }
-        }, 100);
+    // 3. Render semua pesan
+    s.forEach(d => renderMessage(d));
 
-      } else if (change.type === "modified") {
-        const existingMsg = document.getElementById("msg-" + change.doc.id);
-        if(existingMsg) {
-          // Re-render message in place
-          const nextSibling = existingMsg.nextSibling;
-          const parent = existingMsg.parentNode;
-          existingMsg.remove();
-          // Create new msg element but don't append to chatBox yet
-          // Helper function renderMessage modified below to support custom container/return
-          // Untuk simplisitas, kita biarkan dulu karena update jarang terjadi realtime massive
-          // Kita gunakan cara manual:
-          const dummyContainer = document.createElement('div');
-          renderMessage(change.doc, dummyContainer);
-          if(nextSibling) parent.insertBefore(dummyContainer.firstChild, nextSibling);
-          else parent.appendChild(dummyContainer.firstChild);
-        }
-      } else if (change.type === "removed") {
-        const msg = document.getElementById("msg-" + change.doc.id);
-        if(msg) msg.remove();
-      }
-    });
-
-    // Set oldest doc reference
-    if (!oldestMessageDoc && s.docs.length > 0) {
-      oldestMessageDoc = s.docs[0];
+    // 4. Logika Scroll Terkuat
+    if (isFirstLoad) {
+      // Untuk load pertama, gunakan timeout sedikit lebih lama (misal 300ms) 
+      // agar gambar/file selesai diproses DOM-nya
+      setTimeout(() => {
+        chatBox.scrollTop = chatBox.scrollHeight;
+        isFirstLoad = false;
+      }, 300);
+    } else if (isAtBottom) {
+      // Jika ada pesan baru masuk dan user memang sedang di bawah
+      requestAnimationFrame(() => {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
     }
-
+    
   }, error => { console.error("Chat error:", error); });
 }
 
-async function loadOlderMessages() {
-  if (isLoadingOlder || allMessagesLoaded || !oldestMessageDoc) return;
-  
-  isLoadingOlder = true;
-  const oldScrollHeight = chatBox.scrollHeight;
-  const oldScrollTop = chatBox.scrollTop;
-
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'loading-history';
-  loadingDiv.innerHTML = '<small>Memuat pesan...</small>';
-  chatBox.insertBefore(loadingDiv, chatBox.firstChild);
-
-  try {
-    const q = query(
-      collection(db, "pesan"), 
-      orderBy("waktu"), 
-      endBefore(oldestMessageDoc), 
-      limitToLast(20)
-    );
-
-    const snapshot = await getDocs(q);
-    
-    if (snapshot.empty) {
-      allMessagesLoaded = true;
-      loadingDiv.textContent = "Semua pesan telah dimuat";
-      setTimeout(() => loadingDiv.remove(), 2000);
-    } else {
-      loadingDiv.remove();
-      oldestMessageDoc = snapshot.docs[0];
-      
-      const fragment = document.createDocumentFragment();
-      snapshot.forEach(doc => {
-         renderMessage(doc, fragment);
-      });
-      
-      chatBox.insertBefore(fragment, chatBox.firstChild);
-    }
-    
-    chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight + oldScrollTop;
-
-  } catch (err) {
-    console.error("Error load history:", err);
-    loadingDiv.remove();
-  } finally {
-    isLoadingOlder = false;
-  }
-}
-
-function renderMessage(d, container = chatBox) {
+function renderMessage(d) {
   const data = d.data();
   const isMe = data.user === username;
   const msgDiv = document.createElement("div");
@@ -889,10 +1407,7 @@ function renderMessage(d, container = chatBox) {
   msgDiv.id = "msg-" + d.id;
   msgDiv.dataset.timestamp = data.waktu?.toDate ? data.waktu.toDate().getTime() : Date.now();
   
-  const userLabel = document.createElement("small");
-  userLabel.textContent = sanitize(data.user);
-  msgDiv.appendChild(userLabel);
-  
+
   if(data.reply) {
     const replyPreview = document.createElement("div");
     replyPreview.className = "reply-preview";
@@ -1018,7 +1533,36 @@ function renderMessage(d, container = chatBox) {
     msgDiv.appendChild(editedSpan);
   }
   
-  const timeSpan = document.createElement("span");
+const statusContainer = document.createElement("div");
+statusContainer.className = "status-container";
+
+// 1. Elemen Jam
+const timeSpan = document.createElement("span");
+timeSpan.className = "timestamp";
+timeSpan.textContent = formatTime(data.waktu);
+statusContainer.appendChild(timeSpan);
+
+// 2. Elemen Centang (Hanya jika pesan saya)
+if (isMe) {
+  const readStatus = document.createElement("span");
+  readStatus.className = "status-read";
+  
+  // Logika centang: Jika ada lebih dari 1 orang di readBy
+  const isRead = data.readBy && data.readBy.length > 1;
+  
+  readStatus.innerHTML = isRead ? '✓✓' : '✓';
+  readStatus.classList.add(isRead ? 'centang-biru' : 'centang-abu');
+  statusContainer.appendChild(readStatus);
+}
+
+msgDiv.appendChild(statusContainer);
+
+// LOGIKA AUTO-READ:
+if (!isMe && data.readBy && !data.readBy.includes(username)) {
+  updateDoc(doc(db, "pesan", d.id), {
+    readBy: [...data.readBy, username]
+  });
+}
   timeSpan.className = "timestamp";
   timeSpan.textContent = formatTime(data.waktu);
   msgDiv.appendChild(timeSpan);
@@ -1090,9 +1634,7 @@ function renderMessage(d, container = chatBox) {
     if(isMe) msgDiv.classList.add("shift-left");
     menu.style.display = "flex";
   };
-  
-  // APPEND KE CONTAINER TARGET
-  container.appendChild(msgDiv);
+  chatBox.appendChild(msgDiv);
 }
 
 function scrollToMessage(id){
@@ -1105,9 +1647,6 @@ function scrollToMessage(id){
         target.scrollIntoView({behavior: "smooth", block: "center"});
         target.classList.add("highlight");
         setTimeout(() => target.classList.remove("highlight"), 1200);
-      } else if (attempts > 10) {
-         // Pesan mungkin ada di history yang belum dimuat
-         alert("Pesan tersebut sudah terlalu lama (perlu scroll ke atas).");
       }
     }
     attempts++;
@@ -1174,11 +1713,17 @@ window.kirim = async () => {
         } catch (error) { console.error("Upload error:", error); }
       }
     }
-    const messageData = { user: username, waktu: serverTimestamp(), edited: false };
+    const messageData = { 
+  user: username, 
+  waktu: serverTimestamp(), 
+  edited: false,
+  readBy: [username] // <--- Tambahkan ini agar pengirim dianggap sudah membaca
+};
     if (messageText) messageData.teks = sanitize(messageText);
     if (currentReply) messageData.reply = currentReply;
     if (uploadedFiles.length > 0) messageData.files = uploadedFiles;
     await addDoc(collection(db, "pesan"), messageData);
+    setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 100);
   } catch (error) {
     console.error("Send error:", error);
     alert("Gagal mengirim pesan.");
@@ -1221,14 +1766,6 @@ window.logout = async () => {
 };
 
 updateSend();
-
-// EVENT SCROLL UNTUK LOAD HISTORY
-chatBox.addEventListener('scroll', () => {
-  if (chatBox.scrollTop === 0) {
-    loadOlderMessages();
-  }
-});
-
 setTimeout(() => {
   if (input) {
     input.focus();
