@@ -93,7 +93,7 @@ html, body {
   padding:10px;
   /* Optimasi scroll sentuh untuk Mobile */
   -webkit-overflow-scrolling: touch; 
-  scroll-behavior: smooth;
+  scroll-behavior: auto !important;
   background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
   background-attachment:fixed;
 }
@@ -264,12 +264,15 @@ html, body {
 }
 
 /* HIGHLIGHT PESAN */
-.pesan.highlight{
-  animation:flash .8s ease;
+.pesan.highlight {
+  animation: flash 2s ease;
+  z-index: 100;
 }
-@keyframes flash{
-  0%{background:#fff59d}
-  100%{background:inherit}
+
+@keyframes flash {
+  0% { background: #fff59d; transform: scale(1.02); }
+  50% { background: #fff59d; transform: scale(1.02); }
+  100% { background: inherit; transform: scale(1); }
 }
 
 /* REPLY PREVIEW */
@@ -789,6 +792,30 @@ html, body {
   border-radius: 50%;
   animation: pulse 1s infinite;
 }
+
+/* Spinner Animasi */
+#load-more-spinner {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  width: 100%;
+}
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-top: 2px solid #075e54;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+} @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }
+
+.editing-active {
+  outline: 2px solid #25D366; /* Warna hijau WhatsApp */
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  padding: 2px;
+}
 </style>
 </head>
 
@@ -800,9 +827,10 @@ html, body {
     <button id="logoutBtn" onclick="logout()" title="Logout">⎋</button>
   </div>
 
-  <div id="chat-box">
-    <div class="loading">Memuat percakapan...</div>
-  </div>
+<div id="chat-box">
+  <div id="load-more-spinner"><div class="spinner"></div></div>
+  <div class="loading">Memuat percakapan...</div>
+</div>
 
   <div id="input-area">
     <div id="reply-bar">
@@ -838,13 +866,16 @@ html, body {
 </div>
 
 <script type="module">
+// Tambahkan di baris paling atas script module Anda
+import imageCompression from 'https://esm.sh/browser-image-compression@2.0.2';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import {
   getFirestore, collection, addDoc, query, orderBy,
   onSnapshot, doc, getDoc, updateDoc, deleteDoc, serverTimestamp,
-  writeBatch, getDocs, where
+  writeBatch, getDocs, where, 
+  limitToLast, limit, startAfter // <--- Tambahkan 3 fungsi ini
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Import Supabase client
@@ -873,7 +904,11 @@ const db = getFirestore(app);
 let username="", replyData=null;
 let isSending = false;
 let filesToUpload = [];
-let isFirstLoad = true; // <--- TAMBAHKAN INI
+let isFirstLoad = true;
+let lastVisible = null;   // <--- Simpan pesan terlama yang tampil
+let isLoadingMore = false; // <--- Status loading
+let reachedEnd = false;    // <--- Cek apakah sudah habis
+const PAGE_SIZE = 20;      // <--- Jumlah pesan per muat
 
 /* STATE REKAMAN SUARA */
 let mediaRecorder = null;
@@ -898,6 +933,28 @@ const previewContent=document.getElementById("preview-content");
 const logoutBtn=document.getElementById("logoutBtn"); // FIX: Ditambahkan deklarasi ini
 
 /* UTIL FUNCTIONS */
+async function compressImage(file) {
+  const options = {
+    maxSizeMB: 1,          // Ukuran maksimal file hasil kompresi (1MB)
+    maxWidthOrHeight: 1280, // Resolusi maksimal (lebar atau tinggi)
+    useWebWorker: true,
+  };
+  try {
+    console.log(`Mengompresi ${file.name}...`);
+    const compressedFile = await imageCompression(file, options);
+    console.log(`Selesai! Dari ${formatFileSize(file.size)} menjadi ${formatFileSize(compressedFile.size)}`);
+    
+    // Pastikan nama file tetap sama agar tidak error di Supabase
+    return new File([compressedFile], file.name, {
+      type: file.type,
+      lastModified: Date.now(),
+    });
+  } catch (error) {
+    console.error("Gagal kompresi, mengirim file asli:", error);
+    return file; // Jika gagal, gunakan file asli
+  }
+}
+
 function sanitize(text){
   const div = document.createElement('div');
   div.textContent = text;
@@ -1233,14 +1290,36 @@ fileInput.onchange = (e) => {
 function showUploadPreview() {
   uploadPreview.innerHTML = '';
   uploadPreview.style.display = 'block';
+  
   filesToUpload.forEach((file, index) => {
     const previewDiv = document.createElement('div');
     previewDiv.className = 'preview-item';
+    
     let icon = '📄';
-    if(file.type.startsWith('image/')) icon = '🖼️';
-    else if(file.type.startsWith('video/')) icon = '🎬';
-    else if(file.type.startsWith('audio/')) icon = '🎵';
-    previewDiv.innerHTML = `<span>${icon}</span><div class="preview-name">${file.name} (${formatFileSize(file.size)})</div><span class="preview-remove" onclick="removeFile(${index})">✕</span>`;
+    let compressOption = '';
+
+    // Jika file adalah gambar, tambahkan checkbox kompres (default checked)
+    if(file.type.startsWith('image/')) {
+      icon = '🖼️';
+      compressOption = `
+        <label style="font-size: 11px; margin-right: 10px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: #128c7e; font-weight: bold;">
+          <input type="checkbox" class="compress-check" data-index="${index}" checked> Kompres
+        </label>
+      `;
+    } else if(file.type.startsWith('video/')) {
+      icon = '🎬';
+    }
+
+    previewDiv.innerHTML = `
+      <div style="display: flex; align-items: center; flex: 1;">
+        <span>${icon}</span>
+        <div class="preview-name">${file.name} (${formatFileSize(file.size)})</div>
+      </div>
+      <div style="display: flex; align-items: center;">
+        ${compressOption}
+        <span class="preview-remove" onclick="removeFile(${index})" style="margin-left: 10px;">✕</span>
+      </div>
+    `;
     uploadPreview.appendChild(previewDiv);
   });
 }
@@ -1356,48 +1435,53 @@ function updateWhatsAppWaveformDuringPlayback(audio, waveformContainer) {
 
 /* LISTEN CHAT */
 function listenChat(){
-  const q = query(collection(db, "pesan"), orderBy("waktu"));
+  const q = query(
+    collection(db, "pesan"), 
+    orderBy("waktu", "asc"), 
+    limitToLast(PAGE_SIZE)
+  );
   
   onSnapshot(q, s => {
     const loadingEl = chatBox.querySelector('.loading');
     if(loadingEl) loadingEl.remove();
     
-    // 1. Deteksi apakah user sedang berada di posisi paling bawah
-    const threshold = 100;
-    const isAtBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < threshold;
+    const isAtBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < 100;
     
-    // 2. Bersihkan chatBox sebelum render ulang
-    chatBox.innerHTML = ""; 
-    
-    if(s.empty){
-      isFirstLoad = false;
-      const emptyState = document.createElement("div");
-      emptyState.className = "empty-state";
-      emptyState.innerHTML = `<div class="empty-state-icon">💬</div><h3>Belum ada percakapan</h3>`;
-      chatBox.appendChild(emptyState);
-      return;
+    // HANYA isi lastVisible jika benar-benar baru pertama kali load
+    if (!s.empty && isFirstLoad) {
+      lastVisible = s.docs[0];
     }
 
-    // 3. Render semua pesan
-    s.forEach(d => renderMessage(d));
+    // Ambil semua pesan lama yang sudah dirender (jika ada)
+    const oldMessages = Array.from(chatBox.querySelectorAll('.pesan')).filter(el => {
+       // Filter agar pesan yang masuk dalam onSnapshot (20 terbaru) tidak ikut dihitung
+       return !s.docs.some(doc => "msg-" + doc.id === el.id);
+    });
 
-    // 4. Logika Scroll Terkuat
+    // Simpan spinner
+    const spinner = document.getElementById("load-more-spinner");
+    chatBox.innerHTML = '';
+    chatBox.appendChild(spinner);
+
+    // Render pesan lama yang sudah dimuat sebelumnya (agar tidak hilang saat onSnapshot update)
+    oldMessages.forEach(el => chatBox.appendChild(el));
+
+    // Render 20 pesan terbaru dari onSnapshot
+    s.forEach(d => {
+      const el = renderMessage(d);
+      chatBox.appendChild(el);
+    });
+
     if (isFirstLoad) {
-      // Untuk load pertama, gunakan timeout sedikit lebih lama (misal 300ms) 
-      // agar gambar/file selesai diproses DOM-nya
-      setTimeout(() => {
-        chatBox.scrollTop = chatBox.scrollHeight;
-        isFirstLoad = false;
-      }, 300);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      isFirstLoad = false;
     } else if (isAtBottom) {
-      // Jika ada pesan baru masuk dan user memang sedang di bawah
-      requestAnimationFrame(() => {
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
-    
-  }, error => { console.error("Chat error:", error); });
+  });
 }
+
+
 
 function renderMessage(d) {
   const data = d.data();
@@ -1406,8 +1490,48 @@ function renderMessage(d) {
   msgDiv.className = "pesan " + (isMe ? "saya" : "lawan");
   msgDiv.id = "msg-" + d.id;
   msgDiv.dataset.timestamp = data.waktu?.toDate ? data.waktu.toDate().getTime() : Date.now();
-  
 
+  // --- SOLUSI REAL-TIME UNTUK PESAN LAMA & BARU ---
+  // Kita pasang listener spesifik untuk dokumen ini agar Edit/Hapus terpantau tanpa refresh
+  onSnapshot(doc(db, "pesan", d.id), (updatedDoc) => {
+    if (!updatedDoc.exists()) {
+      msgDiv.remove(); 
+      return;
+    }
+    
+    const updatedData = updatedDoc.data();
+    
+    // 1. Update teks jika ada perubahan (Edit)
+    const textEl = msgDiv.querySelector(".msg");
+    if (textEl && updatedData.teks !== textEl.textContent) {
+      textEl.textContent = updatedData.teks;
+    }
+
+    // 2. LOGIKA PERBAIKAN: Tambahkan label (diedit) jika status berubah jadi true
+    if (updatedData.edited && !msgDiv.querySelector(".edited")) {
+      const editedSpan = document.createElement("span");
+      editedSpan.className = "edited";
+      editedSpan.textContent = "(diedit)";
+      
+      // Masukkan sebelum status-container agar rapi
+      const statusContainer = msgDiv.querySelector(".status-container");
+      if (statusContainer) {
+        msgDiv.insertBefore(editedSpan, statusContainer);
+      } else {
+        msgDiv.appendChild(editedSpan);
+      }
+    }
+
+    // 3. Update status centang (Read Status)
+    const readStatus = msgDiv.querySelector(".status-read");
+    if (readStatus && updatedData.readBy) {
+      const isRead = updatedData.readBy.length > 1;
+      readStatus.innerHTML = isRead ? '✓✓' : '✓';
+      readStatus.className = `status-read ${isRead ? 'centang-biru' : 'centang-abu'}`;
+    }
+  });
+  
+  // 1. LOGIKA REPLY (BALASAN PESAN)
   if(data.reply) {
     const replyPreview = document.createElement("div");
     replyPreview.className = "reply-preview";
@@ -1416,6 +1540,7 @@ function renderMessage(d) {
     msgDiv.appendChild(replyPreview);
   }
   
+  // 2. LOGIKA FILE (GAMBAR, VIDEO, PESAN SUARA, DOKUMEN)
   if(data.files && data.files.length > 0) {
     const fileContainer = document.createElement("div");
     fileContainer.className = "file-container";
@@ -1428,10 +1553,12 @@ function renderMessage(d) {
         const playButton = document.createElement("button");
         playButton.className = "voice-play-btn";
         playButton.innerHTML = '<span class="play-icon">▶</span><span class="pause-icon" style="display:none">❚❚</span>';
+        
         const waveformContainer = createWhatsAppVoiceWaveform(isMe, data.voiceDuration || 10);
         const durationText = document.createElement("div");
         durationText.className = "voice-duration";
         durationText.textContent = formatVoiceDuration(data.voiceDuration || 1);
+        
         voiceContainer.appendChild(playButton);
         voiceContainer.appendChild(waveformContainer.container);
         voiceContainer.appendChild(durationText);
@@ -1439,29 +1566,21 @@ function renderMessage(d) {
         
         let currentAudio = null;
         let isPlaying = false;
-        let cleanupWaveform = null;
         
         playButton.onclick = function(e) {
           e.stopPropagation();
           if (currentAudio && isPlaying) {
             currentAudio.pause();
-            isPlaying = false;
-            playButton.classList.remove('playing');
-            playButton.querySelector('.play-icon').style.display = 'block';
-            playButton.querySelector('.pause-icon').style.display = 'none';
           } else {
             if (!currentAudio) {
               currentAudio = new Audio(file.url);
               currentAudio.preload = 'auto';
-              cleanupWaveform = updateWhatsAppWaveformDuringPlayback(currentAudio, waveformContainer);
+              updateWhatsAppWaveformDuringPlayback(currentAudio, waveformContainer);
               currentAudio.onended = function() {
                 isPlaying = false;
                 playButton.classList.remove('playing');
                 playButton.querySelector('.play-icon').style.display = 'block';
                 playButton.querySelector('.pause-icon').style.display = 'none';
-                waveformContainer.progressOverlay.style.width = '0%';
-                waveformContainer.progressIndicator.style.display = 'none';
-                for (let bar of waveformContainer.bars) bar.classList.remove('active');
               };
               currentAudio.onpause = function() {
                 isPlaying = false;
@@ -1469,7 +1588,6 @@ function renderMessage(d) {
                 playButton.querySelector('.play-icon').style.display = 'block';
                 playButton.querySelector('.pause-icon').style.display = 'none';
               };
-              currentAudio.load();
             }
             currentAudio.play();
             isPlaying = true;
@@ -1478,11 +1596,8 @@ function renderMessage(d) {
             playButton.querySelector('.pause-icon').style.display = 'block';
           }
         };
-        msgDiv.addEventListener('DOMNodeRemoved', function() {
-          if (cleanupWaveform) cleanupWaveform();
-          if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-        });
         fileContainer.appendChild(voiceMessageContainer);
+
       } else if(file.type.startsWith('image/')) {
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
@@ -1490,22 +1605,26 @@ function renderMessage(d) {
         img.src = file.url; img.alt = file.name;
         img.onclick = () => showPreview(file.url, 'image');
         filePreview.appendChild(img);
+        
         const fileInfo = document.createElement("div");
         fileInfo.className = "file-info";
         fileInfo.innerHTML = `<div class="file-name">${file.name}</div><div class="file-size">${formatFileSize(file.size)}</div>`;
         filePreview.appendChild(fileInfo);
         fileContainer.appendChild(filePreview);
+
       } else if(file.type.startsWith('video/')) {
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
         const video = document.createElement("video");
         video.src = file.url; video.controls = true; video.preload = "metadata";
         filePreview.appendChild(video);
+        
         const fileInfo = document.createElement("div");
         fileInfo.className = "file-info";
         fileInfo.innerHTML = `<div class="file-name">${file.name}</div><div class="file-size">${formatFileSize(file.size)}</div>`;
         filePreview.appendChild(fileInfo);
         fileContainer.appendChild(filePreview);
+
       } else {
         const filePreview = document.createElement("div");
         filePreview.className = "file-preview";
@@ -1519,6 +1638,7 @@ function renderMessage(d) {
     msgDiv.appendChild(fileContainer);
   }
   
+  // 3. LOGIKA TEKS PESAN
   if(data.teks && data.teks.trim() !== '' && !data.isVoiceMessage) {
     const textDiv = document.createElement("div");
     textDiv.className = "msg";
@@ -1533,43 +1653,37 @@ function renderMessage(d) {
     msgDiv.appendChild(editedSpan);
   }
   
-const statusContainer = document.createElement("div");
-statusContainer.className = "status-container";
+  // 4. CONTAINER STATUS (JAM & CENTANG)
+  const statusContainer = document.createElement("div");
+  statusContainer.className = "status-container";
 
-// 1. Elemen Jam
-const timeSpan = document.createElement("span");
-timeSpan.className = "timestamp";
-timeSpan.textContent = formatTime(data.waktu);
-statusContainer.appendChild(timeSpan);
-
-// 2. Elemen Centang (Hanya jika pesan saya)
-if (isMe) {
-  const readStatus = document.createElement("span");
-  readStatus.className = "status-read";
-  
-  // Logika centang: Jika ada lebih dari 1 orang di readBy
-  const isRead = data.readBy && data.readBy.length > 1;
-  
-  readStatus.innerHTML = isRead ? '✓✓' : '✓';
-  readStatus.classList.add(isRead ? 'centang-biru' : 'centang-abu');
-  statusContainer.appendChild(readStatus);
-}
-
-msgDiv.appendChild(statusContainer);
-
-// LOGIKA AUTO-READ:
-if (!isMe && data.readBy && !data.readBy.includes(username)) {
-  updateDoc(doc(db, "pesan", d.id), {
-    readBy: [...data.readBy, username]
-  });
-}
+  const timeSpan = document.createElement("span");
   timeSpan.className = "timestamp";
   timeSpan.textContent = formatTime(data.waktu);
-  msgDiv.appendChild(timeSpan);
+  statusContainer.appendChild(timeSpan);
+
+  if (isMe) {
+    const readStatus = document.createElement("span");
+    readStatus.className = "status-read";
+    const isRead = data.readBy && data.readBy.length > 1;
+    readStatus.innerHTML = isRead ? '✓✓' : '✓';
+    readStatus.classList.add(isRead ? 'centang-biru' : 'centang-abu');
+    statusContainer.appendChild(readStatus);
+  }
+  msgDiv.appendChild(statusContainer);
+
+  if (!isMe && data.readBy && !data.readBy.includes(username)) {
+    updateDoc(doc(db, "pesan", d.id), {
+      readBy: [...data.readBy, username]
+    });
+  }
   
+  // 5. MENU BUBBLE (BALAS, EDIT, HAPUS)
   const menu = document.createElement("div");
   menu.className = "bubble-menu " + (isMe ? "outside" : "inside");
-  menu.innerHTML = isMe ? `<button title="Balas">↩</button><button title="Edit">✎</button><button title="Hapus">🗑</button>` : `<button title="Balas">↩</button>`;
+  menu.innerHTML = isMe ? 
+    `<button title="Balas">↩</button><button title="Edit">✎</button><button title="Hapus">🗑</button>` : 
+    `<button title="Balas">↩</button>`;
 
   menu.children[0].onclick = () => {
     const replyPreviewText = data.files && data.files.length > 0 ? `[File: ${data.files.length} file]` : data.teks || '[File]';
@@ -1581,48 +1695,54 @@ if (!isMe && data.readBy && !data.readBy.includes(username)) {
   };
 
   if(isMe){
-    menu.children[1].onclick = async() => {
+    menu.children[1].onclick = async () => {
       closeMenus();
       const msgElement = msgDiv.querySelector(".msg");
-      if(!msgElement) return;
+      if (!msgElement) return;
+
       const originalText = msgElement.textContent;
       msgElement.contentEditable = true;
       msgElement.focus();
-      const range = document.createRange();
-      range.selectNodeContents(msgElement);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-      msgElement.onkeydown = async e => {
-        if(e.key === "Enter" && !e.shiftKey){
-          e.preventDefault();
-          msgElement.contentEditable = false;
-          const newText = msgElement.textContent.trim();
-          if(newText && newText !== originalText){
-            await updateDoc(doc(db,"pesan",d.id),{ teks: newText, edited: true });
-          }
-        }
-        if(e.key === "Escape"){ msgElement.contentEditable = false; msgElement.textContent = originalText; }
-      };
-      msgElement.onblur = async() => {
-        msgElement.contentEditable = false;
+      msgElement.classList.add("editing-active");
+
+      const saveEdit = async () => {
+        if (msgElement.contentEditable !== "true") return;
         const newText = msgElement.textContent.trim();
-        if(newText && newText !== originalText){
-          await updateDoc(doc(db,"pesan",d.id),{ teks: newText, edited: true });
+        msgElement.contentEditable = false;
+        msgElement.classList.remove("editing-active");
+
+        if (newText !== "" && newText !== originalText) {
+          try {
+            await updateDoc(doc(db, "pesan", d.id), {
+              teks: newText,
+              edited: true
+            });
+          } catch (error) {
+            console.error("Gagal edit:", error);
+            msgElement.textContent = originalText;
+          }
+        } else {
+          msgElement.textContent = originalText;
         }
       };
+
+      msgElement.onkeydown = (e) => {
+        if (e.key === "Enter") { e.preventDefault(); msgElement.blur(); }
+        if (e.key === "Escape") { msgElement.textContent = originalText; msgElement.blur(); }
+      };
+      msgElement.onblur = () => { saveEdit(); };
     };
 
     menu.children[2].onclick = async() => {
       closeMenus();
       if(confirm("Hapus pesan ini?")){
-        if(data.files && data.files.length > 0) {
-          try {
+        try {
+          if(data.files && data.files.length > 0) {
             const filesToDelete = data.files.map(file => file.path);
             await supabase.storage.from('chat-storage').remove(filesToDelete);
-          } catch (error) { console.error("Error cleaning up files:", error); }
-        }
-        await deleteDoc(doc(db,"pesan",d.id));
+          }
+          await deleteDoc(doc(db,"pesan",d.id));
+        } catch (error) { console.error("Error delete:", error); }
       }
     };
   }
@@ -1634,23 +1754,32 @@ if (!isMe && data.readBy && !data.readBy.includes(username)) {
     if(isMe) msgDiv.classList.add("shift-left");
     menu.style.display = "flex";
   };
-  chatBox.appendChild(msgDiv);
+  
+  return msgDiv;
 }
 
-function scrollToMessage(id){
-  let attempts = 0;
-  const interval = setInterval(() => {
-    const target = document.getElementById("msg-" + id);
-    if(target || attempts > 10){
-      clearInterval(interval);
-      if(target){
-        target.scrollIntoView({behavior: "smooth", block: "center"});
-        target.classList.add("highlight");
-        setTimeout(() => target.classList.remove("highlight"), 1200);
-      }
+async function scrollToMessage(id) {
+  let target = document.getElementById("msg-" + id);
+  
+  // Jika pesan tidak ada di layar, coba muat pesan lama
+  if (!target && !reachedEnd) {
+    console.log("Mencari pesan lama...");
+    
+    // Looping untuk memuat pesan lama sampai target ditemukan atau data habis
+    while (!target && !reachedEnd) {
+      await loadMoreMessages(); // Memanggil fungsi muat pesan yang sudah ada
+      target = document.getElementById("msg-" + id);
     }
-    attempts++;
-  }, 50);
+  }
+
+  // Jika akhirnya ditemukan
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add("highlight");
+    setTimeout(() => target.classList.remove("highlight"), 1200);
+  } else {
+    alert("Pesan asli terlalu lama atau sudah dihapus.");
+  }
 }
 
 window.showPreview = (url, type) => {
@@ -1685,10 +1814,14 @@ window.kirim = async () => {
   const hasFiles = filesToUpload.length > 0;
   if (!text && !hasFiles) return;
   
+  // Ambil referensi checkbox kompresi yang ada di preview saat ini
+  const compressCheckboxes = document.querySelectorAll('.compress-check');
+  
   const messageText = text;
   const currentReply = replyData;
   const currentFiles = [...filesToUpload];
   
+  // Reset UI Input segera setelah tombol ditekan
   input.value = "";
   replyData = null;
   replyBar.style.display = "none";
@@ -1705,36 +1838,65 @@ window.kirim = async () => {
   
   try {
     let uploadedFiles = [];
+    
     if (hasFiles) {
-      for (const file of currentFiles) {
+      // Loop menggunakan for...of agar proses upload berjalan urut atau gunakan Promise.all
+      for (let i = 0; i < currentFiles.length; i++) {
+        let fileToProcess = currentFiles[i];
+
+        // LOGIKA KOMPRESI: 
+        // Cek apakah file adalah gambar
+        if (fileToProcess.type.startsWith('image/')) {
+          // Cari checkbox yang sesuai dengan index file ini
+          const checkEl = Array.from(compressCheckboxes).find(c => parseInt(c.dataset.index) === i);
+          
+          // Jika checkbox dicentang (atau jika elemen tidak ditemukan/default), lakukan kompresi
+          if (!checkEl || checkEl.checked) {
+            fileToProcess = await compressImage(fileToProcess);
+          } else {
+            console.log(`Mengirim file asli: ${fileToProcess.name}`);
+          }
+        }
+
         try {
-          const fileData = await uploadToSupabase(file);
+          const fileData = await uploadToSupabase(fileToProcess);
           uploadedFiles.push(fileData);
-        } catch (error) { console.error("Upload error:", error); }
+        } catch (error) {
+          console.error("Gagal upload file:", fileToProcess.name, error);
+        }
       }
     }
+
+    // Siapkan data pesan untuk Firestore
     const messageData = { 
-  user: username, 
-  waktu: serverTimestamp(), 
-  edited: false,
-  readBy: [username] // <--- Tambahkan ini agar pengirim dianggap sudah membaca
-};
+      user: username, 
+      waktu: serverTimestamp(), 
+      edited: false,
+      readBy: [username] 
+    };
+
     if (messageText) messageData.teks = sanitize(messageText);
     if (currentReply) messageData.reply = currentReply;
     if (uploadedFiles.length > 0) messageData.files = uploadedFiles;
+
+    // Simpan ke Firestore
     await addDoc(collection(db, "pesan"), messageData);
+    
+    // Scroll ke bawah setelah terkirim
     setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 100);
+
   } catch (error) {
     console.error("Send error:", error);
     alert("Gagal mengirim pesan.");
+    
+    // Kembalikan status jika gagal agar user tidak kehilangan ketikan
     input.value = messageText;
-    if (currentReply) {
-      replyData = currentReply;
-      replyText.textContent = `${currentReply.user}: ${currentReply.text}`;
-      replyBar.style.display = "flex";
-    }
     filesToUpload = currentFiles;
     if (filesToUpload.length > 0) showUploadPreview();
+    if (currentReply) {
+      replyData = currentReply;
+      replyBar.style.display = "flex";
+    }
   } finally {
     isSending = false;
     sendBtn.innerHTML = originalHTML;
@@ -1764,6 +1926,75 @@ window.logout = async () => {
     }
   }
 };
+
+// Pasang listener pada elemen chatBox
+chatBox.addEventListener("scroll", () => {
+  // Jika scroll ada di posisi paling atas (0), jalankan muat pesan
+  if (chatBox.scrollTop === 0 && !isLoadingMore && !reachedEnd) {
+    loadMoreMessages();
+  }
+});
+
+// Fungsi untuk mengambil pesan lama
+async function loadMoreMessages() {
+  if (isLoadingMore || reachedEnd || !lastVisible) return;
+
+  const spinner = document.getElementById("load-more-spinner");
+  isLoadingMore = true;
+  spinner.style.display = "flex";
+
+  const oldScrollHeight = chatBox.scrollHeight;
+
+  try {
+    const q = query(
+      collection(db, "pesan"),
+      orderBy("waktu", "desc"), // Ambil dari baru ke lama
+      startAfter(lastVisible),
+      limit(PAGE_SIZE)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      reachedEnd = true;
+      spinner.style.display = "none";
+      return;
+    }
+
+    lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+    // GUNAKAN DOCUMENT FRAGMENT agar render stabil
+    const fragment = document.createDocumentFragment();
+    
+    // Balik urutan: dari lama ke baru agar pas masuk fragment urutannya benar
+    const docs = [...snapshot.docs].reverse(); 
+
+    docs.forEach(d => {
+      const msgEl = renderMessage(d);
+      fragment.appendChild(msgEl); // Masukkan ke wadah sementara
+    });
+
+    // Tempelkan seluruh blok pesan sekaligus di bawah spinner
+    chatBox.insertBefore(fragment, spinner.nextSibling);
+
+    // Jaga posisi scroll agar tidak melompat ke atas
+    chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
+
+  } catch (error) {
+    console.error("Gagal memuat:", error);
+  } finally {
+    isLoadingMore = false;
+    spinner.style.display = "none";
+  }
+}
+
+// Fungsi pembantu agar pesan muncul di atas
+function renderMessageAtTop(d) {
+  const currentFirst = chatBox.firstChild;
+  renderMessage(d); // Gunakan fungsi render Anda yang sudah ada
+  const newMsg = chatBox.lastChild; // Ambil elemen yang baru dibuat tadi
+  chatBox.insertBefore(newMsg, currentFirst); // Pindahkan ke posisi paling atas
+}
 
 updateSend();
 setTimeout(() => {
